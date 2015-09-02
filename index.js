@@ -18,6 +18,7 @@ function eagleCreek (user, pass, opts) {
   var filter = null
   var request = null
   var currentOffset = null
+  var headers = extend(HEADERS, {})
 
   return stream
 
@@ -33,7 +34,7 @@ function eagleCreek (user, pass, opts) {
       path: '/api/events/',
       method: 'POST',
       auth: user + ':' + pass,
-      headers: extend(HEADERS, contentLength(connectFilter))
+      headers: extend(headers, contentLength(connectFilter))
     }, gotResponse)
 
     request.on('error', emitError)
@@ -52,8 +53,24 @@ function eagleCreek (user, pass, opts) {
   }
 
   function gotResponse (response) {
-    response.pipe(zlib.createGunzip()).pipe(split()).on('data', emitData)
+    if (response.statusCode === 307 && response.headers['set-cookie']) {
+      headers.Cookie = response.headers['set-cookie'][0]
+      checkReconnect()
+
+      return
+    }
+
+    if (response.statusCode !== 200) {
+      stream.emit(
+        'error',
+        new Error(response.statusCode + ': ' + response.statusMessage)
+      )
+
+      return
+    }
+
     response.on('end', checkReconnect)
+    response.pipe(zlib.createGunzip()).pipe(split()).on('data', emitData)
   }
 
   function emitData (data) {
