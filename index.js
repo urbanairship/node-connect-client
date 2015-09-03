@@ -1,5 +1,7 @@
 var zlib = require('zlib')
-var http = require('https')
+var https = require('https')
+var http = require('http')
+var url = require('url')
 
 var through = require('through2').obj
 var extend = require('xtend')
@@ -10,15 +12,21 @@ var HEADERS = {
   'Content-Type': 'application/json'
 }
 
+var CONNECT_URL = 'https://connect.urbanairship.com/api/events/'
+
 module.exports = eagleCreek
 
-function eagleCreek (user, pass, opts) {
+function eagleCreek (user, pass, _opts) {
+  var opts = _opts || {}
   var stream = through(write, end)
+  var headers = extend(HEADERS, {})
+  var apiUrl = url.parse(opts.uri || CONNECT_URL)
+  var protocol = apiUrl.protocol === 'https:' ? https : http
   var ended = false
+
   var filter = null
   var request = null
   var currentOffset = null
-  var headers = extend(HEADERS, {})
 
   return stream
 
@@ -29,21 +37,20 @@ function eagleCreek (user, pass, opts) {
       connectFilter.resume_offset = currentOffset
     }
 
-    request = http.request({
-      hostname: 'connect.urbanairship.com',
-      path: '/api/events/',
+    request = protocol.request(extend(apiUrl, {
       method: 'POST',
       auth: user + ':' + pass,
       headers: extend(headers, contentLength(connectFilter))
-    }, gotResponse)
+    }), gotResponse)
 
     request.on('error', emitError)
+    request.on('end', checkReconnect)
 
     request.write(JSON.stringify(connectFilter))
   }
 
   function contentLength (body) {
-    return {'Content-length': JSON.stringify(body).length}
+    return {'Content-Length': JSON.stringify(body).length}
   }
 
   function checkReconnect () {
@@ -89,22 +96,27 @@ function eagleCreek (user, pass, opts) {
     }
   }
 
-  function write (data) {
+  function write (data, _, next) {
     filter = data
+    currentOffset = null
 
     if (request) {
       request.end()
     } else {
       startRequest()
     }
+
+    next()
   }
 
-  function end () {
+  function end (done) {
     ended = true
 
     if (request) {
       request.end()
     }
+
+    done()
   }
 
   function emitError (err) {
