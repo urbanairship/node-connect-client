@@ -75,8 +75,8 @@ function eagleCreek (user, pass, _opts) {
       return
     }
 
-    response.on('end', checkReconnect)
     response.pipe(zlib.createGunzip()).pipe(split()).on('data', emitData)
+    response.on('end', checkReconnect)
   }
 
   function emitData (data) {
@@ -113,9 +113,10 @@ function eagleCreek (user, pass, _opts) {
 
     if (request) {
       request.end()
+      request.on('end', done)
+    } else {
+      done()
     }
-
-    done()
   }
 
   function emitError (err) {
