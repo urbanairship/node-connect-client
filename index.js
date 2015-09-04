@@ -44,7 +44,6 @@ function eagleCreek (user, pass, _opts) {
     }), gotResponse)
 
     request.on('error', emitError)
-    request.on('end', checkReconnect)
 
     request.write(JSON.stringify(connectFilter))
   }
@@ -102,9 +101,9 @@ function eagleCreek (user, pass, _opts) {
 
     if (request) {
       request.end()
-    } else {
-      startRequest()
     }
+
+    startRequest()
 
     next()
   }

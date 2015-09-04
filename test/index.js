@@ -4,7 +4,7 @@ var test = require('tape')
 var findPort = require('find-port')
 
 var connect = require('../')
-//var mockConnect = require('./mock')
+var mockConnect = require('./mock')
 
 test('posts to provided URL with provided basic auth', function (t) {
   t.plan(6)
@@ -80,6 +80,45 @@ test('sets a cookie for redirect', function (t) {
       res.setHeader('set-cookie', ['chocolate-chip'])
       res.statusCode = 307
       res.end()
+    }
+  }
+})
+
+test('emits data objects', function (t) {
+  t.plan(3)
+
+  var data = [
+    {lol: true},
+    {cats: ['garfield', 'top cat']},
+    {x: 1, y: -1, z: 10000}
+  ]
+  var server
+  var stream
+
+  findPort(8000, 9000, setupMock)
+
+  function setupMock (ports) {
+    var port = ports[0]
+
+    server = mockConnect(data)
+
+    server.listen(port, runTests)
+
+    function runTests () {
+      stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+
+      var counter = 0
+
+      stream.on('data', function (x) {
+        t.deepEqual(x, data[counter])
+
+        if (++counter === data.length) {
+          server.close()
+          t.end()
+        }
+      })
+
+      stream.end({merp: 'lol'})
     }
   }
 })
