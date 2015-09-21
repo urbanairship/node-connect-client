@@ -1,15 +1,18 @@
 {
-  "name": "node-eagle-creek",
+  "name": "urban-airship-connect",
   "version": "1.0.0",
-  "description": "node client for Urban Airship's Eagle Creek",
+  "description": "node client for Urban Airship's Connect",
   "main": "index.js",
+  "bin": {
+    "connect": "./bin/connect.js"
+  },
   "scripts": {
     "test": "node test/*.js && npm run lint",
-    "lint": "standard index.js test/*.js"
+    "lint": "standard index.js test/*.js bin/connect.js"
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@atlassian.prod.urbanairship.com:2222/js/node-eagle-creek.git"
+    "url": "git@github.com:urbanairship/node-connect-client.git"
   },
   "keywords": [
     "eagle",
@@ -30,6 +33,7 @@
     "tape": "4.2.0"
   },
   "dependencies": {
+    "minimist": "1.2.0",
     "split": "0.3.3",
     "through2": "2.0.0",
     "xtend": "4.0.0"

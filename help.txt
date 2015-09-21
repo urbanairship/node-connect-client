@@ -1,0 +1,10 @@
+=======================================================
+Usage: connect <username> <password> [options]
+
+Options:
+
+--uri <uri>                Use a custom uri for Connect
+--offset <offset>          Start at <offset>
+--earliest                 Start at earliest offset
+--username <username>      Explicitly set username
+--password <password>      Explicitly set password
