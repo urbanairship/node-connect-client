@@ -7,7 +7,7 @@ var connect = require('../')
 var mockConnect = require('./mock')
 
 test('posts to provided URL with provided basic auth', function (t) {
-  t.plan(6)
+  t.plan(7)
 
   var toWrite = {whatever: 'who cares'}
   var server
@@ -21,7 +21,7 @@ test('posts to provided URL with provided basic auth', function (t) {
     server = http.createServer(checkRequest).listen(port, runTests)
 
     function runTests () {
-      stream = connect('user1', 'hunter2', {uri: 'http://localhost:' + port})
+      stream = connect('appkey1', 'accesstoken2', {uri: 'http://localhost:' + port})
       stream.write(toWrite)
     }
   }
@@ -37,7 +37,8 @@ test('posts to provided URL with provided basic auth', function (t) {
       req.headers['content-length'],
       JSON.stringify(toWrite).length.toString()
     )
-    t.equal(req.headers.authorization, authHeader('user1', 'hunter2'))
+    t.equal(req.headers.authorization, 'Bearer accesstoken2')
+    t.equal(req.headers['x-ua-appkey'], 'appkey1')
 
     req.on('data', function (data) {
       t.equal(data.toString(), JSON.stringify(toWrite))
@@ -122,7 +123,3 @@ test('emits data objects', function (t) {
     }
   }
 })
-
-function authHeader (user, pass) {
-  return 'Basic ' + new Buffer(user + ':' + pass, 'binary').toString('base64')
-}
