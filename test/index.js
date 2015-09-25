@@ -170,6 +170,58 @@ test('sets a cookie for redirect, emits event', function (t) {
   }
 })
 
+test('resumes at last offset on reconnect', function (t) {
+  t.plan(1)
+
+  var server
+  var stream
+
+  findPort(8000, 9000, setupServer)
+
+  function setupServer (ports) {
+    var port = ports[0]
+
+    server = http.createServer(firstHandler).listen(port, setupStream)
+
+    function setupStream () {
+      stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+
+      stream.once('data', function () {
+        server.close(restartServer)
+      })
+
+      stream.write({whatever: 'who cares'})
+    }
+
+    function restartServer () {
+      server = http.createServer(secondHandler).listen(port)
+    }
+
+    function secondHandler (req, res) {
+      var buf = ''
+
+      req.on('data', function (data) {
+        buf += data
+      })
+
+      req.on('end', function () {
+        t.equal(JSON.parse(buf).resume_offset, '12345')
+        res.end()
+        server.close()
+        stream.end()
+        t.end()
+      })
+    }
+  }
+
+  function firstHandler (req, res) {
+    var gzip = zlib.createGzip()
+
+    gzip.pipe(res)
+    gzip.end(JSON.stringify({offset: '12345'}) + '\n')
+  }
+})
+
 test('emits data objects', function (t) {
   t.plan(3)
 

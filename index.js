@@ -33,7 +33,7 @@ function connect (appKey, accessToken, _opts) {
   function startRequest () {
     var connectFilter = extend(filter, {})
 
-    if (!connectFilter.resume_offset && currentOffset) {
+    if (currentOffset) {
       connectFilter.resume_offset = currentOffset
     }
 
