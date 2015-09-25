@@ -131,8 +131,8 @@ test('emits an error on bad encoding', function (t) {
   }
 })
 
-test('sets a cookie for redirect', function (t) {
-  t.plan(1)
+test('sets a cookie for redirect, emits event', function (t) {
+  t.plan(2)
 
   var server
   var stream
@@ -146,6 +146,10 @@ test('sets a cookie for redirect', function (t) {
 
     function runTests () {
       stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+
+      stream.once('redirect', function () {
+        t.pass('event emitted')
+      })
 
       stream.write({whatever: 'who cares'})
     }

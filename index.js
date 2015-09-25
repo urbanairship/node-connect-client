@@ -14,9 +14,9 @@ var HEADERS = {
 
 var CONNECT_URL = 'https://connect.urbanairship.com/api/events/'
 
-module.exports = eagleCreek
+module.exports = connect
 
-function eagleCreek (appKey, accessToken, _opts) {
+function connect (appKey, accessToken, _opts) {
   var opts = _opts || {}
   var stream = through(write, end)
   var headers = extend(HEADERS, {})
@@ -36,6 +36,8 @@ function eagleCreek (appKey, accessToken, _opts) {
     if (!connectFilter.resume_offset && currentOffset) {
       connectFilter.resume_offset = currentOffset
     }
+
+    stream.emit('connect')
 
     request = protocol.request(extend(apiUrl, {
       method: 'POST',
@@ -63,6 +65,7 @@ function eagleCreek (appKey, accessToken, _opts) {
 
   function gotResponse (response) {
     if (response.statusCode === 307 && response.headers['set-cookie']) {
+      stream.emit('redirect')
       headers.Cookie = response.headers['set-cookie'][0]
       checkReconnect()
 
