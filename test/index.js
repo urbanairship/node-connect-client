@@ -1,4 +1,6 @@
 var http = require('http')
+var util = require('util')
+var zlib = require('zlib')
 
 var test = require('tape')
 var findPort = require('find-port')
@@ -6,7 +8,7 @@ var findPort = require('find-port')
 var connect = require('../')
 var mockConnect = require('./mock')
 
-test('posts to provided URL with provided basic auth', function (t) {
+test('posts to provided URL with provided token', function (t) {
   t.plan(7)
 
   var toWrite = {whatever: 'who cares'}
@@ -21,7 +23,11 @@ test('posts to provided URL with provided basic auth', function (t) {
     server = http.createServer(checkRequest).listen(port, runTests)
 
     function runTests () {
-      stream = connect('appkey1', 'accesstoken2', {uri: 'http://localhost:' + port})
+      stream = connect(
+        'appkey1',
+        'accesstoken2',
+        {uri: 'http://localhost:' + port}
+      )
       stream.write(toWrite)
     }
   }
@@ -46,6 +52,81 @@ test('posts to provided URL with provided basic auth', function (t) {
       server.close()
       stream.end()
       t.end()
+    })
+  }
+})
+
+test('emits an error on bad JSON', function (t) {
+  t.plan(1)
+
+  var server
+  var stream
+
+  findPort(8000, 9000, setupServer)
+
+  function setupServer (ports) {
+    var port = ports[0]
+
+    server = http.createServer(emitBad).listen(port, runTests)
+
+    function runTests () {
+      stream = connect(
+        'appkey1',
+        'accesstoken2',
+        {uri: 'http://localhost:' + port}
+      )
+      stream.on('error', function (err) {
+        t.ok(util.isError(err))
+        stream.end()
+        server.close()
+        t.end()
+      })
+      stream.write({whatever: 'who cares'})
+    }
+  }
+
+  function emitBad (req, res) {
+    req.on('data', function (data) {
+      var gzip = zlib.createGzip()
+
+      gzip.pipe(res)
+      gzip.end('undefined')
+    })
+  }
+})
+
+test('emits an error on bad encoding', function (t) {
+  t.plan(1)
+
+  var server
+  var stream
+
+  findPort(8000, 9000, setupServer)
+
+  function setupServer (ports) {
+    var port = ports[0]
+
+    server = http.createServer(emitBad).listen(port, runTests)
+
+    function runTests () {
+      stream = connect(
+        'appkey1',
+        'accesstoken2',
+        {uri: 'http://localhost:' + port}
+      )
+      stream.on('error', function (err) {
+        t.ok(util.isError(err))
+        stream.end()
+        t.end()
+      })
+      stream.write({whatever: 'who cares'})
+    }
+  }
+
+  function emitBad (req, res) {
+    req.on('data', function (data) {
+      res.end('not gzipped')
+      server.close()
     })
   }
 })

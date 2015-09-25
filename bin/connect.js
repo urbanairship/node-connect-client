@@ -27,17 +27,17 @@ function bin () {
     return version()
   }
 
-  if (!options.username) {
+  if (!options.key) {
     if (options._.length) {
-      options.username = options._[0]
+      options.key = options._[0]
     } else {
       return help()
     }
   }
 
-  if (!options.password) {
+  if (!options.token) {
     if (options._.length > 1) {
-      options.password = options._[1]
+      options.token = options._[1]
     } else {
       return help()
     }
@@ -47,7 +47,7 @@ function bin () {
     streamOptions.uri = options.uri
   }
 
-  stream = connect(options.username, options.password, streamOptions)
+  stream = connect(options.key, options.token, streamOptions)
 
   stream.on('data', console.log.bind(console))
 

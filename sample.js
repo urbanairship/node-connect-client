@@ -2,7 +2,6 @@
 
 var stream = require('./')
 
-//node test.js appKey accessToken
 var test = stream(process.argv[2], process.argv[3])
 
 test.on('data', console.log.bind(console))

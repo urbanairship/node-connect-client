@@ -4,8 +4,8 @@ var http = require('http')
 var url = require('url')
 
 var through = require('through2').obj
+var ndjson = require('ndjson')
 var extend = require('xtend')
-var split = require('split')
 
 var HEADERS = {
   'Accept': 'application/vnd.urbanairship+x-ndjson;version=3;',
@@ -49,9 +49,9 @@ function eagleCreek (appKey, accessToken, _opts) {
 
   function createConnectHeaders (body) {
     return {
-        'Content-Length': JSON.stringify(body).length,
-        'X-UA-Appkey': appKey,
-        'Authorization': 'Bearer ' + accessToken
+      'Content-Length': JSON.stringify(body).length,
+      'X-UA-Appkey': appKey,
+      'Authorization': 'Bearer ' + accessToken
     }
   }
 
@@ -78,24 +78,19 @@ function eagleCreek (appKey, accessToken, _opts) {
       return
     }
 
-    response.pipe(zlib.createGunzip()).pipe(split()).on('data', emitData)
-    response.on('end', checkReconnect)
+    response
+      .pipe(zlib.createGunzip())
+        .on('error', emitError)
+      .pipe(ndjson.parse())
+        .on('data', emitData)
+        .on('error', emitError)
+        .on('end', checkReconnect)
   }
 
   function emitData (data) {
-    if (!data.length) {
-      return
-    }
+    currentOffset = data.offset
 
-    try {
-      var parsed = JSON.parse(data)
-
-      currentOffset = parsed.offset
-
-      stream.push(parsed)
-    } catch (err) {
-      stream.emit('error', err)
-    }
+    stream.push(data)
   }
 
   function write (data, _, next) {

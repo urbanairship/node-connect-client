@@ -4,7 +4,7 @@
   "description": "node client for Urban Airship's Connect",
   "main": "index.js",
   "bin": {
-    "connect": "./bin/connect.js"
+    "ua-connect": "./bin/connect.js"
   },
   "scripts": {
     "test": "node test/*.js && npm run lint",
@@ -15,11 +15,9 @@
     "url": "git@github.com:urbanairship/node-connect-client.git"
   },
   "keywords": [
-    "eagle",
-    "creek",
-    "client",
     "urban",
     "airship",
+    "connect",
     "stream"
   ],
   "author": "Urban Airship",
@@ -34,7 +32,7 @@
   },
   "dependencies": {
     "minimist": "1.2.0",
-    "split": "0.3.3",
+    "ndjson": "1.4.2",
     "through2": "2.0.0",
     "xtend": "4.0.0"
   }
