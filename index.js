@@ -16,7 +16,7 @@ var CONNECT_URL = 'https://connect.urbanairship.com/api/events/'
 
 module.exports = eagleCreek
 
-function eagleCreek (user, pass, _opts) {
+function eagleCreek (appKey, accessToken, _opts) {
   var opts = _opts || {}
   var stream = through(write, end)
   var headers = extend(HEADERS, {})
@@ -39,8 +39,7 @@ function eagleCreek (user, pass, _opts) {
 
     request = protocol.request(extend(apiUrl, {
       method: 'POST',
-      auth: user + ':' + pass,
-      headers: extend(headers, contentLength(connectFilter))
+      headers: extend(headers, createConnectHeaders(connectFilter))
     }), gotResponse)
 
     request.on('error', emitError)
@@ -48,8 +47,12 @@ function eagleCreek (user, pass, _opts) {
     request.write(JSON.stringify(connectFilter))
   }
 
-  function contentLength (body) {
-    return {'Content-Length': JSON.stringify(body).length}
+  function createConnectHeaders (body) {
+    return {
+        'Content-Length': JSON.stringify(body).length,
+        'X-UA-Appkey': appKey,
+        'Authorization': 'Bearer ' + accessToken
+    }
   }
 
   function checkReconnect () {

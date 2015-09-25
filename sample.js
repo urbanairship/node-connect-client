@@ -1,9 +1,13 @@
+#!/usr/bin/env node
+
 var stream = require('./')
 
-var test = stream('ISex_TTJRuarzs9-o_Gkhg', 'cqEQS-QzSFW4TdssghiBLQ')
+//node test.js appKey accessToken
+var test = stream(process.argv[2], process.argv[3])
 
 test.on('data', console.log.bind(console))
 test.on('error', function (err) {
   console.log('error!', err)
+  test.end()
 })
 test.write({start: 'LATEST'})
