@@ -32,6 +32,10 @@ objects over time.
 
 ## Notes
 
+If an error is encountered during a request, a bad status code is encountered,
+or JSON parsing of an event fails, an `'error'` event will be emitted with the
+relevant information.
+
 This module will handle connecting and maintaining a connection to Urban
 Airship's Connect service. If its connection is ever severed, it will do its
 best to resume at the last seen offset.
@@ -40,9 +44,43 @@ The `resume_offset` is not stored externally, so if the process using this
 module is killed, crashes, or otherwise exits it will be lost. In general it is
 advisable to track this offset yourself.
 
-If an error is encountered during a request, a bad status code is encountered,
-or JSON parsing of an event fails, an `'error'` event will be emitted with the
-relevant information.
+### Writing offset to disk
+
+```javascript
+var fs = require('fs')
+
+var connect = require('urban-airship-connect')
+var lookupStream = require('dotpath-stream')
+var writeFile = require('file-replace-stream')
+
+var connectStream = connect('appKey', 'authToken')
+var filters = {}
+
+// set up our pipeline for saving offsets
+connectStream
+  // pull out just the `offset` property
+  .pipe(lookupStream('offset'))
+  // write it to `last_offset.txt`
+  .pipe(writeFile('last_offset.txt'))
+
+try {
+  // try to read our offset file
+  filters.resume_offset = fs.readFileSync('last_offset.txt', {encoding: 'utf8'})
+} catch (err) {
+  // fall back to starting at earliest offset
+  filters.start = 'EARLIEST'
+}
+
+// write the filters to Connect to start streaming events
+connectStream.write(filters)
+```
+
+#### Notes
+
+* `writeFile` could be swapped out for _any_ writable stream for persistence.
+* If streams aren't your thing, you could alternatively listen to the `data`
+  event of `connectStream` and persist the `offset` property from the passed
+  event however you please.
 
 ## Command-line Interface
 
