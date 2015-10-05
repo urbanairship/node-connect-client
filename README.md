@@ -90,7 +90,7 @@ Connect setup, not for anything "mission-critical".
 
 ### Usage
 
-`connect <app-key> <token> [options]`
+`ua-connect <app-key> <token> [options]`
 
 Where options are:
 
