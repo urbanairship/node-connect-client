@@ -67,7 +67,7 @@ try {
   // try to read our offset file
   filters.resume_offset = fs.readFileSync('last_offset.txt', {encoding: 'utf8'})
 } catch (err) {
-  // fall back to starting at earliest offset
+  // fall back to starting at latest offset
   filters.start = 'LATEST'
 }
 
