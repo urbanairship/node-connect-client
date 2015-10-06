@@ -14,7 +14,7 @@ connectStream.on('data', function (data) {
 })
 
 // write to the stream to set filters/offset/start
-connectStream.write({start: 'EARLIEST'})
+connectStream.write({start: 'LATEST'})
 ```
 
 ## API
@@ -68,7 +68,7 @@ try {
   filters.resume_offset = fs.readFileSync('last_offset.txt', {encoding: 'utf8'})
 } catch (err) {
   // fall back to starting at earliest offset
-  filters.start = 'EARLIEST'
+  filters.start = 'LATEST'
 }
 
 // write the filters to Connect to start streaming events
