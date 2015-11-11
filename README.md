@@ -1,5 +1,11 @@
 # urban-airship-connect
 
+[![Build Status](http://img.shields.io/travis/urbanairship/node-connect-client.svg?style=flat-square)](https://travis-ci.org/urbanairship/node-connect-client)
+[![npm install](http://img.shields.io/npm/dm/urban-airship-connect.svg?style=flat-square)](https://www.npmjs.org/package/urban-airship-connect)
+[![npm version](https://img.shields.io/npm/v/urban-airship-connect.svg?style=flat-square)](https://www.npmjs.org/package/urban-airship-connect)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
+[![License](https://img.shields.io/npm/l/urban-airship-connect.svg?style=flat-square)](https://github.com/urbanairship/node-connect-client/blob/master/LICENSE)
+
 A node library for Urban Airship's Connect
 
 ## Example Usage
