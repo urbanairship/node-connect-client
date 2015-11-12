@@ -1,0 +1,39 @@
+{
+  "name": "urban-airship-connect",
+  "version": "1.0.0",
+  "description": "node client for Urban Airship's Connect",
+  "main": "index.js",
+  "bin": {
+    "ua-connect": "./bin/connect.js"
+  },
+  "scripts": {
+    "test": "node test/*.js && npm run lint",
+    "lint": "standard index.js test/*.js bin/connect.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:urbanairship/node-connect-client.git"
+  },
+  "keywords": [
+    "urban",
+    "airship",
+    "connect",
+    "stream"
+  ],
+  "author": "Urban Airship",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "eslint": "1.2.1",
+    "eslint-config-standard": "4.1.0",
+    "eslint-plugin-standard": "1.2.0",
+    "find-port": "1.0.1",
+    "standard": "5.1.0",
+    "tape": "4.2.0"
+  },
+  "dependencies": {
+    "minimist": "1.2.0",
+    "ndjson": "1.4.2",
+    "through2": "2.0.0",
+    "xtend": "4.0.0"
+  }
+}
