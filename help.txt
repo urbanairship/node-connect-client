@@ -1,5 +1,5 @@
 =======================================================
-Usage: connect <app-key> <token> [options]
+Usage: ua-connect <app-key> <token> [options]
 
 Options:
 
