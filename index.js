@@ -4,7 +4,7 @@ var http = require('http')
 var url = require('url')
 
 var through = require('through2').obj
-var ndjson = require('ndjson')
+var split = require('split2')
 var extend = require('xtend')
 
 var HEADERS = {
@@ -21,6 +21,7 @@ function connect (appKey, accessToken, _opts) {
   var stream = through(write, end)
   var headers = extend(HEADERS, {})
   var apiUrl = url.parse(opts.uri || CONNECT_URL)
+  var parser = opts.parser || JSON.parse.bind(JSON)
   var protocol = apiUrl.protocol === 'https:' ? https : http
   var ended = false
 
@@ -84,10 +85,22 @@ function connect (appKey, accessToken, _opts) {
     response
       .pipe(zlib.createGunzip())
         .on('error', emitError)
-      .pipe(ndjson.parse())
+      .pipe(split(parseJSON))
         .on('data', emitData)
-        .on('error', emitError)
         .on('end', checkReconnect)
+  }
+
+  function parseJSON (data) {
+    if (!data) {
+      return
+    }
+
+    try {
+      return parser(data)
+    } catch (err) {
+      err.blob = data
+      stream.emit('error', err)
+    }
   }
 
   function emitData (data) {

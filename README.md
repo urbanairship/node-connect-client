@@ -31,6 +31,8 @@ connectStream.write({start: 'LATEST'})
 * `authToken` is your Connect auth token
 * `options` is an optional object accepting parameters:
   - `uri` to specify the URI to a running Connect instance
+  - `parser` to specify a custom JSON parser of signature:
+    `parse(String) -> Object`; defaults to `JSON.parse`
 
 The returned duplex stream reads and writes plain JavaScript objects. Writes
 are posted to Connect, and the responding events are emitted as plain JavaScript
@@ -40,7 +42,13 @@ objects over time.
 
 If an error is encountered during a request, a bad status code is encountered,
 or JSON parsing of an event fails, an `'error'` event will be emitted with the
-relevant information.
+error attached. For JSON parse errors, the blob that caused the error will be
+available as the `blob` property of the error.
+
+It is possible for a Custom Event value to be a number that cannot be parsed by
+JavaScript [see docs](http://docs.urbanairship.com/api/connect.html#custom-event).
+If you suspect you might encounter this issue, you may want to provide your own
+JSON parser, see [API](#api).
 
 This module will handle connecting and maintaining a connection to Urban
 Airship's Connect service. If its connection is ever severed, it will do its

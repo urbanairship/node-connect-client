@@ -56,8 +56,8 @@ test('posts to provided URL with provided token', function (t) {
   }
 })
 
-test('emits an error on bad JSON', function (t) {
-  t.plan(1)
+test('emits an error on bad JSON with blob attached', function (t) {
+  t.plan(2)
 
   var server
   var stream
@@ -77,12 +77,59 @@ test('emits an error on bad JSON', function (t) {
       )
       stream.on('error', function (err) {
         t.ok(util.isError(err))
+        t.equal(err.blob, 'undefined')
         stream.end()
         server.close()
         t.end()
       })
       stream.write({whatever: 'who cares'})
     }
+  }
+
+  function emitBad (req, res) {
+    req.on('data', function (data) {
+      var gzip = zlib.createGzip()
+
+      gzip.pipe(res)
+      gzip.end('undefined')
+    })
+  }
+})
+
+test('can provide custom parser', function (t) {
+  t.plan(2)
+
+  var server
+  var stream
+
+  findPort(8000, 9000, setupServer)
+
+  function setupServer (ports) {
+    var port = ports[0]
+
+    server = http.createServer(emitBad).listen(port, runTests)
+
+    function runTests () {
+      stream = connect(
+        'appkey1',
+        'accesstoken2',
+        {uri: 'http://localhost:' + port, parser: customParser}
+      )
+      stream.on('error', t.fail)
+      stream.on('data', function (data) {
+        t.deepEqual(data, {wacky: 'wut'})
+        stream.end()
+        server.close()
+        t.end()
+      })
+      stream.write({whatever: 'who cares'})
+    }
+  }
+
+  function customParser (data) {
+    t.equal(data, 'undefined')
+
+    return {wacky: 'wut'}
   }
 
   function emitBad (req, res) {
