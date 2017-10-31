@@ -37,12 +37,12 @@ function connect (appKey, accessToken, _opts) {
     if (currentOffset) {
       connectFilter.resume_offset = currentOffset
     }
-
     stream.emit('connect')
-
+    var finalHeaders = extend(headers, createConnectHeaders(connectFilter))
+    var headersWithCreds = 
     request = protocol.request(extend(apiUrl, {
       method: 'POST',
-      headers: extend(headers, createConnectHeaders(connectFilter))
+      headers: finalHeaders
     }), gotResponse)
 
     request.on('error', emitError)
@@ -66,7 +66,7 @@ function connect (appKey, accessToken, _opts) {
 
   function gotResponse (response) {
     if (response.statusCode === 307 && response.headers['set-cookie']) {
-      stream.emit('redirect')
+      stream.emit('redirect', response.headers['set-cookie'])
       headers.Cookie = response.headers['set-cookie'][0]
       checkReconnect()
 
@@ -74,11 +74,15 @@ function connect (appKey, accessToken, _opts) {
     }
 
     if (response.statusCode !== 200) {
-      stream.emit(
-        'error',
-        new Error(response.statusCode + ': ' + response.statusMessage)
-      )
+      var err = new Error(response.statusCode + ': ' + response.statusMessage)
+      err.responseBody = ''
 
+      response.on('data', function(data) {
+        err.responseBody += data
+      })
+      response.on('end', function() {
+        stream.emit('error', err)
+      })
       return
     }
 
