@@ -135,10 +135,6 @@ function connect (appKey, accessToken, _opts) {
   }
 
   function emitError (err) {
-    if (err.errno && err.errno === -5) {
-      return
-    }
-
     stream.emit('error', err)
   }
 }

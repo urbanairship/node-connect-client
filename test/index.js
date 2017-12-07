@@ -49,7 +49,9 @@ test('posts to provided URL with provided token', function (t) {
 
     req.on('data', function (data) {
       t.equal(data.toString(), JSON.stringify(toWrite))
-      res.end()
+      const gzip = zlib.createGzip()
+      gzip.pipe(res)
+      gzip.end()
       server.close()
       stream.end()
       t.end()
@@ -204,16 +206,19 @@ test('sets a cookie for redirect, emits event', function (t) {
   }
 
   function redirectHandler (req, res) {
+    var gzip = zlib.createGzip()
+    gzip.pipe(res)
+
     if (req.headers.cookie) {
       t.equal(req.headers.cookie, 'chocolate-chip')
-      res.end()
+      gzip.end()
       server.close()
       stream.end()
       t.end()
     } else {
       res.setHeader('set-cookie', ['chocolate-chip'])
       res.statusCode = 307
-      res.end()
+      gzip.end()
     }
   }
 })
@@ -254,7 +259,9 @@ test('resumes at last offset on reconnect', function (t) {
 
       req.on('end', function () {
         t.equal(JSON.parse(buf).resume_offset, '12345')
-        res.end()
+        var gzip = zlib.createGzip()
+        gzip.pipe(res)
+        gzip.end()
         server.close()
         stream.end()
         t.end()
@@ -311,4 +318,5 @@ test('emits data objects', function (t) {
 
 function portError () {
   console.error('Unable to find an available port for test server')
+  process.exit(1)
 }
