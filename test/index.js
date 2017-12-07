@@ -8,7 +8,7 @@ var findPort = require('portfinder').getPort
 var connect = require('../')
 var mockConnect = require('./mock')
 
-test.only('posts to provided URL with provided token', function (t) {
+test('posts to provided URL with provided token', function (t) {
   t.plan(7)
 
   var toWrite = {whatever: 'who cares'}
