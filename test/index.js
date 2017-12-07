@@ -15,11 +15,9 @@ test('posts to provided URL with provided token', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(checkRequest).listen(port, runTests)
 
     function runTests () {
@@ -65,11 +63,9 @@ test('emits an error on bad JSON with blob attached', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
     function runTests () {
@@ -105,11 +101,9 @@ test('can provide custom parser', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
     function runTests () {
@@ -151,11 +145,9 @@ test('emits an error on bad encoding', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
     function runTests () {
@@ -187,11 +179,9 @@ test('sets a cookie for redirect, emits event', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(redirectHandler).listen(port, runTests)
 
     function runTests () {
@@ -229,11 +219,9 @@ test('resumes at last offset on reconnect', function (t) {
   var server
   var stream
 
-  findPort(setupServer)
+  getPort(setupServer)
 
-  function setupServer (err, port) {
-    if (err) return portError()
-
+  function setupServer (port) {
     server = http.createServer(firstHandler).listen(port, setupStream)
 
     function setupStream () {
@@ -288,11 +276,9 @@ test('emits data objects', function (t) {
   var server
   var stream
 
-  findPort(setupMock)
+  getPort(setupMock)
 
-  function setupMock (err, port) {
-    if (err) return portError()
-
+  function setupMock (port) {
     server = mockConnect(data)
 
     server.listen(port, runTests)
@@ -316,7 +302,15 @@ test('emits data objects', function (t) {
   }
 })
 
-function portError () {
-  console.error('Unable to find an available port for test server')
-  process.exit(1)
+function getPort (ready) {
+  findPort(readyOrError)
+
+  function readyOrError (err, port) {
+    if (err) {
+      console.error('Unable to find an available port for test server')
+      process.exit(1)
+    }
+
+    ready(port)
+  }
 }
