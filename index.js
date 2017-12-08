@@ -42,7 +42,8 @@ function connect (appKey, accessToken, _opts) {
 
     request = protocol.request(extend(apiUrl, {
       method: 'POST',
-      headers: extend(headers, createConnectHeaders(connectFilter))
+      headers: extend(headers, createConnectHeaders(connectFilter)),
+      ecdhCurve: 'auto'
     }), gotResponse)
 
     request.on('error', emitError)
