@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/urban-airship-connect.svg?style=flat-square)](https://www.npmjs.org/package/urban-airship-connect)
 [![License](https://img.shields.io/npm/l/urban-airship-connect.svg?style=flat-square)](https://github.com/urbanairship/node-connect-client/blob/master/LICENSE)
 
-A node library for Urban Airship's Connect
+A node library for Airship's Real Time Data Streaming (formely Connect)
 
 ## Example Usage
 
@@ -26,15 +26,15 @@ connectStream.write({start: 'LATEST'})
 
 `connect(appKey, authToken[, options]) -> duplexStream`
 
-* `appKey` is your Urban Airship app key
-* `authToken` is your Connect auth token
+* `appKey` is your Airship app key
+* `authToken` is your RTDS auth token
 * `options` is an optional object accepting parameters:
-  - `uri` to specify the URI to a running Connect instance
+  - `uri` to specify the URI to a running RTDS instance
   - `parser` to specify a custom JSON parser of signature:
     `parse(String) -> Object`; defaults to `JSON.parse`
 
 The returned duplex stream reads and writes plain JavaScript objects. Writes
-are posted to Connect, and the responding events are emitted as plain JavaScript
+are posted to RTDS (Real Time Data Streaming), and the responding events are emitted as plain JavaScript
 objects over time.
 
 ## Notes
@@ -45,12 +45,12 @@ error attached. For JSON parse errors, the blob that caused the error will be
 available as the `blob` property of the error.
 
 It is possible for a Custom Event value to be a number that cannot be parsed by
-JavaScript [see docs](http://docs.urbanairship.com/api/connect.html#custom-event).
+JavaScript [see docs](http://docs.airship.com/api/connect.html#custom-event).
 If you suspect you might encounter this issue, you may want to provide your own
 JSON parser, see [API](#api).
 
-This module will handle connecting and maintaining a connection to Urban
-Airship's Connect service. If its connection is ever severed, it will do its
+This module will handle connecting and maintaining a connection to
+Airship's Real Time Data Streaming service. If its connection is ever severed, it will do its
 best to resume at the last seen offset.
 
 The `resume_offset` is not stored externally, so if the process using this
@@ -84,7 +84,7 @@ try {
   filters.start = 'LATEST'
 }
 
-// write the filters to Connect to start streaming events
+// write the filters to RTDS to start streaming events
 connectStream.write(filters)
 ```
 
@@ -99,7 +99,7 @@ connectStream.write(filters)
 
 A simple command-line utility `ua-connect` is bundled along with this module. It
 should be mostly used for testing your credentials or other aspects of your
-Connect setup, not for anything "mission-critical".
+RTDS setup, not for anything "mission-critical".
 
 ### Usage
 
@@ -107,7 +107,7 @@ Connect setup, not for anything "mission-critical".
 
 Where options are:
 
-* `--uri <uri>` Use a custom uri for Connect
+* `--uri <uri>` Use a custom uri for RTDS
 * `--offset <offset>` Start at `<offset>`
 * `--earliest` Start at earliest offset
 * `--key <app-key>` Explicitly set app key

@@ -3,7 +3,7 @@ Usage: ua-connect <app-key> <token> [options]
 
 Options:
 
---uri <uri>                Use a custom uri for Connect
+--uri <uri>                Use a custom uri for Real Time Data Streaming
 --offset <offset>          Start at <offset>
 --earliest                 Start at earliest offset
 --key <app-key>            Explicitly set app key
