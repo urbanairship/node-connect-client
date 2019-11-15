@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/urban-airship-connect.svg?style=flat-square)](https://www.npmjs.org/package/urban-airship-connect)
 [![License](https://img.shields.io/npm/l/urban-airship-connect.svg?style=flat-square)](https://github.com/urbanairship/node-connect-client/blob/master/LICENSE)
 
-A node library for Airship's Real Time Data Streaming (formely Connect)
+A node library for Airship's Real Time Data Streaming (formerly Connect)
 
 ## Example Usage
 
