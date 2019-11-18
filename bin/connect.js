@@ -68,5 +68,5 @@ function help () {
 }
 
 function version () {
-  console.error('Connect client version ' + pkg.version)
+  console.error('RTDS client version ' + pkg.version)
 }

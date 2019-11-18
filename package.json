@@ -1,7 +1,7 @@
 {
   "name": "urban-airship-connect",
-  "version": "1.1.1",
-  "description": "node client for Urban Airship's Connect",
+  "version": "1.1.2",
+  "description": "node client for Airship's Real Time Data Streaming",
   "main": "index.js",
   "bin": {
     "ua-connect": "./bin/connect.js"
@@ -19,7 +19,7 @@
     "connect",
     "stream"
   ],
-  "author": "Urban Airship",
+  "author": "Airship",
   "license": "Apache-2.0",
   "devDependencies": {
     "portfinder": "1.0.13",
