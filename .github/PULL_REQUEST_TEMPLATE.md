@@ -13,10 +13,9 @@ Please include link to open issue if applicable.
 - [ ] If these changes added new functionality, I tested them against the live API with real auth
 - [ ] I wrote tests covering these changes
 
-* I've tested for Ruby versions:
+* I've tested for Node versions:
 
-- [ ] 2.2.5
-- [ ] 2.3.1
+- [ ] 12.13.0
 
 ### Airship Contribution Agreement
 [Link here](https://docs.google.com/forms/d/e/1FAIpQLScErfiz-fXSPpVZ9r8Di2Tr2xDFxt5MgzUel0__9vqUgvko7Q/viewform)
