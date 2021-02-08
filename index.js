@@ -6,7 +6,6 @@ var url = require('url')
 var through = require('through2').obj
 var split = require('split2')
 var extend = require('xtend')
-var pump = require('pump')
 
 var HEADERS = {
   Accept: 'application/vnd.urbanairship+x-ndjson;version=3;',
@@ -89,7 +88,10 @@ function connect(appKey, accessToken, _opts) {
     }
 
     responseStream = response
-    pump(response, zlib.createGunzip(), split(parseJSON))
+    response
+      .pipe(zlib.createGunzip())
+      .on('error', emitError)
+      .pipe(split(parseJSON))
       .on('error', emitError)
       .on('data', emitData)
       .on('end', checkReconnect)
@@ -127,11 +129,10 @@ function connect(appKey, accessToken, _opts) {
     next()
   }
 
-  function end(done) {
+  function end() {
     ended = true
     if (request) request.destroy()
     if (responseStream) responseStream.destroy()
-    done()
   }
 
   function emitError(err) {
