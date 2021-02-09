@@ -8,15 +8,15 @@ var split = require('split2')
 var extend = require('xtend')
 
 var HEADERS = {
-  'Accept': 'application/vnd.urbanairship+x-ndjson;version=3;',
-  'Content-Type': 'application/json'
+  Accept: 'application/vnd.urbanairship+x-ndjson;version=3;',
+  'Content-Type': 'application/json',
 }
 
 var CONNECT_URL = 'https://connect.urbanairship.com/api/events/'
 
 module.exports = connect
 
-function connect (appKey, accessToken, _opts) {
+function connect(appKey, accessToken, _opts) {
   var opts = _opts || {}
   var stream = through(write, end)
   var headers = extend(HEADERS, {})
@@ -28,10 +28,11 @@ function connect (appKey, accessToken, _opts) {
   var filter = null
   var request = null
   var currentOffset = null
+  var responseStream = null
 
   return stream
 
-  function startRequest () {
+  function startRequest() {
     var connectFilter = extend(filter, {})
 
     if (currentOffset) {
@@ -40,32 +41,35 @@ function connect (appKey, accessToken, _opts) {
 
     stream.emit('connect')
 
-    request = protocol.request(extend(apiUrl, {
-      method: 'POST',
-      headers: extend(headers, createConnectHeaders(connectFilter)),
-      ecdhCurve: 'auto'
-    }), gotResponse)
+    request = protocol.request(
+      extend(apiUrl, {
+        method: 'POST',
+        headers: extend(headers, createConnectHeaders(connectFilter)),
+        ecdhCurve: 'auto',
+      }),
+      gotResponse
+    )
 
     request.on('error', emitError)
 
     request.write(JSON.stringify(connectFilter))
   }
 
-  function createConnectHeaders (body) {
+  function createConnectHeaders(body) {
     return {
       'Content-Length': JSON.stringify(body).length,
       'X-UA-Appkey': appKey,
-      'Authorization': 'Bearer ' + accessToken
+      Authorization: 'Bearer ' + accessToken,
     }
   }
 
-  function checkReconnect () {
+  function checkReconnect() {
     if (!ended) {
       startRequest()
     }
   }
 
-  function gotResponse (response) {
+  function gotResponse(response) {
     if (response.statusCode === 307 && response.headers['set-cookie']) {
       stream.emit('redirect')
       headers.Cookie = response.headers['set-cookie'][0]
@@ -83,15 +87,17 @@ function connect (appKey, accessToken, _opts) {
       return
     }
 
+    responseStream = response
     response
       .pipe(zlib.createGunzip())
-        .on('error', emitError)
+      .on('error', emitError)
       .pipe(split(parseJSON))
-        .on('data', emitData)
-        .on('end', checkReconnect)
+      .on('error', emitError)
+      .on('data', emitData)
+      .on('end', checkReconnect)
   }
 
-  function parseJSON (data) {
+  function parseJSON(data) {
     if (!data) {
       return
     }
@@ -100,17 +106,17 @@ function connect (appKey, accessToken, _opts) {
       return parser(data)
     } catch (err) {
       err.blob = data
-      stream.emit('error', err)
+      emitError(err)
     }
   }
 
-  function emitData (data) {
+  function emitData(data) {
     currentOffset = data.offset
 
     stream.push(data)
   }
 
-  function write (data, _, next) {
+  function write(data, _, next) {
     filter = data
     currentOffset = null
 
@@ -123,18 +129,15 @@ function connect (appKey, accessToken, _opts) {
     next()
   }
 
-  function end (done) {
+  function end() {
     ended = true
-
-    if (request) {
-      request.end()
-      request.on('end', done)
-    } else {
-      done()
-    }
+    if (request) request.destroy()
+    if (responseStream) responseStream.destroy()
   }
 
-  function emitError (err) {
+  function emitError(err) {
+    // if the stream is ending, we can just swallow any errors
+    if (ended) return
     stream.emit('error', err)
   }
 }

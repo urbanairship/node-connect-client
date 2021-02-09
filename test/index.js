@@ -11,27 +11,25 @@ var mockConnect = require('./mock')
 test('posts to provided URL with provided token', function (t) {
   t.plan(7)
 
-  var toWrite = {whatever: 'who cares'}
+  var toWrite = { whatever: 'who cares' }
   var server
   var stream
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(checkRequest).listen(port, runTests)
 
-    function runTests () {
-      stream = connect(
-        'appkey1',
-        'accesstoken2',
-        {uri: 'http://localhost:' + port}
-      )
+    function runTests() {
+      stream = connect('appkey1', 'accesstoken2', {
+        uri: 'http://localhost:' + port,
+      })
 
       stream.write(toWrite)
     }
   }
 
-  function checkRequest (req, res) {
+  function checkRequest(req, res) {
     t.equal(req.method.toLowerCase(), 'post')
     t.equal(
       req.headers.accept,
@@ -65,15 +63,13 @@ test('emits an error on bad JSON with blob attached', function (t) {
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
-    function runTests () {
-      stream = connect(
-        'appkey1',
-        'accesstoken2',
-        {uri: 'http://localhost:' + port}
-      )
+    function runTests() {
+      stream = connect('appkey1', 'accesstoken2', {
+        uri: 'http://localhost:' + port,
+      })
       stream.on('error', function (err) {
         t.ok(util.isError(err))
         t.equal(err.blob, 'undefined')
@@ -81,11 +77,11 @@ test('emits an error on bad JSON with blob attached', function (t) {
         server.close()
         t.end()
       })
-      stream.write({whatever: 'who cares'})
+      stream.write({ whatever: 'who cares' })
     }
   }
 
-  function emitBad (req, res) {
+  function emitBad(req, res) {
     req.on('data', function (data) {
       var gzip = zlib.createGzip()
 
@@ -103,33 +99,32 @@ test('can provide custom parser', function (t) {
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
-    function runTests () {
-      stream = connect(
-        'appkey1',
-        'accesstoken2',
-        {uri: 'http://localhost:' + port, parser: customParser}
-      )
+    function runTests() {
+      stream = connect('appkey1', 'accesstoken2', {
+        uri: 'http://localhost:' + port,
+        parser: customParser,
+      })
       stream.on('error', t.fail)
       stream.on('data', function (data) {
-        t.deepEqual(data, {wacky: 'wut'})
+        t.deepEqual(data, { wacky: 'wut' })
         stream.end()
         server.close()
         t.end()
       })
-      stream.write({whatever: 'who cares'})
+      stream.write({ whatever: 'who cares' })
     }
   }
 
-  function customParser (data) {
+  function customParser(data) {
     t.equal(data, 'undefined')
 
-    return {wacky: 'wut'}
+    return { wacky: 'wut' }
   }
 
-  function emitBad (req, res) {
+  function emitBad(req, res) {
     req.on('data', function (data) {
       var gzip = zlib.createGzip()
 
@@ -147,28 +142,26 @@ test('emits an error on bad encoding', function (t) {
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(emitBad).listen(port, runTests)
 
-    function runTests () {
-      stream = connect(
-        'appkey1',
-        'accesstoken2',
-        {uri: 'http://localhost:' + port}
-      )
+    function runTests() {
+      stream = connect('appkey1', 'accesstoken2', {
+        uri: 'http://localhost:' + port,
+      })
       stream.on('error', function (err) {
         t.ok(util.isError(err))
+        server.close()
         stream.end()
         t.end()
       })
-      stream.write({whatever: 'who cares'})
+      stream.write({ whatever: 'who cares' })
     }
   }
 
-  function emitBad (req, res) {
+  function emitBad(req, res) {
     req.on('data', function (data) {
       res.end('not gzipped')
-      server.close()
     })
   }
 })
@@ -181,21 +174,21 @@ test('sets a cookie for redirect, emits event', function (t) {
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(redirectHandler).listen(port, runTests)
 
-    function runTests () {
-      stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+    function runTests() {
+      stream = connect('x', 'x', { uri: 'http://localhost:' + port })
 
       stream.once('redirect', function () {
         t.pass('event emitted')
       })
 
-      stream.write({whatever: 'who cares'})
+      stream.write({ whatever: 'who cares' })
     }
   }
 
-  function redirectHandler (req, res) {
+  function redirectHandler(req, res) {
     var gzip = zlib.createGzip()
     gzip.pipe(res)
 
@@ -221,24 +214,24 @@ test('resumes at last offset on reconnect', function (t) {
 
   getPort(setupServer)
 
-  function setupServer (port) {
+  function setupServer(port) {
     server = http.createServer(firstHandler).listen(port, setupStream)
 
-    function setupStream () {
-      stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+    function setupStream() {
+      stream = connect('x', 'x', { uri: 'http://localhost:' + port })
 
       stream.once('data', function () {
         server.close(restartServer)
       })
 
-      stream.write({whatever: 'who cares'})
+      stream.write({ whatever: 'who cares' })
     }
 
-    function restartServer () {
+    function restartServer() {
       server = http.createServer(secondHandler).listen(port)
     }
 
-    function secondHandler (req, res) {
+    function secondHandler(req, res) {
       var buf = ''
 
       req.on('data', function (data) {
@@ -257,11 +250,11 @@ test('resumes at last offset on reconnect', function (t) {
     }
   }
 
-  function firstHandler (req, res) {
+  function firstHandler(req, res) {
     var gzip = zlib.createGzip()
 
     gzip.pipe(res)
-    gzip.end(JSON.stringify({offset: '12345'}) + '\n')
+    gzip.end(JSON.stringify({ offset: '12345' }) + '\n')
   }
 })
 
@@ -269,22 +262,22 @@ test('emits data objects', function (t) {
   t.plan(3)
 
   var data = [
-    {lol: true},
-    {cats: ['garfield', 'top cat']},
-    {x: 1, y: -1, z: 10000}
+    { lol: true },
+    { cats: ['garfield', 'top cat'] },
+    { x: 1, y: -1, z: 10000 },
   ]
   var server
   var stream
 
   getPort(setupMock)
 
-  function setupMock (port) {
+  function setupMock(port) {
     server = mockConnect(data)
 
     server.listen(port, runTests)
 
-    function runTests () {
-      stream = connect('x', 'x', {uri: 'http://localhost:' + port})
+    function runTests() {
+      stream = connect('x', 'x', { uri: 'http://localhost:' + port })
 
       var counter = 0
 
@@ -293,19 +286,20 @@ test('emits data objects', function (t) {
 
         if (++counter === data.length) {
           server.close()
+          stream.end()
           t.end()
         }
       })
 
-      stream.end({merp: 'lol'})
+      stream.write({ merp: 'lol' })
     }
   }
 })
 
-function getPort (ready) {
+function getPort(ready) {
   findPort(readyOrError)
 
-  function readyOrError (err, port) {
+  function readyOrError(err, port) {
     if (err) {
       console.error('Unable to find an available port for test server')
       process.exit(1)
