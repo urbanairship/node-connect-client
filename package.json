@@ -1,6 +1,6 @@
 {
   "name": "urban-airship-connect",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "node client for Airship's Real Time Data Streaming",
   "main": "index.js",
   "bin": {
