@@ -3,6 +3,7 @@
   "version": "2.0.1",
   "description": "node client for Airship's Real Time Data Streaming",
   "main": "index.js",
+  "types": "./index.d.ts",
   "bin": {
     "ua-connect": "./bin/connect.js"
   },
@@ -22,6 +23,7 @@
   "author": "Airship",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/through2": "^2.0.38",
     "portfinder": "1.0.13",
     "tape": "4.2.0"
   },
