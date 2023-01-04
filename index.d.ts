@@ -1,13 +1,16 @@
 import through2 = require("through2");
 export = connect
-type TParser<JSON> = {
-  [Property in keyof JSON]: (variable: any) => JSON[Property]
-}
+type JSONValue =
+    | string
+    | number
+    | boolean
+    | { [x: string]: JSONValue }
+    | Array<JSONValue>
+type TParser = (input: string) => JSONValue
 type TOptions = {
-  uri?: string
-  parse?: () => TParser<JSON>
+    uri?: string
+    parse?: TParser
 }
-
 declare function connect(
   appKey: string,
   accessToken: string,
