@@ -1,7 +1,7 @@
 var zlib = require('zlib')
 var https = require('https')
 var http = require('http')
-var url = require('url')
+var URL = require('url').URL
 
 var through = require('through2').obj
 var split = require('split2')
@@ -20,7 +20,7 @@ function connect(appKey, accessToken, _opts) {
   var opts = _opts || {}
   var stream = through(write, end)
   var headers = extend(HEADERS, {})
-  var apiUrl = url.parse(opts.uri || CONNECT_URL)
+  var apiUrl = new URL(opts.uri || CONNECT_URL)
   var parser = opts.parser || JSON.parse.bind(JSON)
   var protocol = apiUrl.protocol === 'https:' ? https : http
   var ended = false
@@ -42,11 +42,20 @@ function connect(appKey, accessToken, _opts) {
     stream.emit('connect')
 
     request = protocol.request(
-      extend(apiUrl, {
+      {
+        protocol: apiUrl.protocol,
+        hostname: apiUrl.hostname.replace(/^\[|\]$/g, ''),
+        port: apiUrl.port,
+        path: apiUrl.pathname + apiUrl.search,
+        auth: apiUrl.username
+          ? decodeURIComponent(apiUrl.username) +
+            ':' +
+            decodeURIComponent(apiUrl.password)
+          : undefined,
         method: 'POST',
         headers: extend(headers, createConnectHeaders(connectFilter)),
         ecdhCurve: 'auto',
-      }),
+      },
       gotResponse
     )
 

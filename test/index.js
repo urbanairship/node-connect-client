@@ -1,5 +1,4 @@
 var http = require('http')
-var util = require('util')
 var zlib = require('zlib')
 
 var test = require('tape')
@@ -71,7 +70,7 @@ test('emits an error on bad JSON with blob attached', function (t) {
         uri: 'http://localhost:' + port,
       })
       stream.on('error', function (err) {
-        t.ok(util.isError(err))
+        t.ok(err instanceof Error)
         t.equal(err.blob, 'undefined')
         stream.end()
         server.close()
@@ -150,7 +149,7 @@ test('emits an error on bad encoding', function (t) {
         uri: 'http://localhost:' + port,
       })
       stream.on('error', function (err) {
-        t.ok(util.isError(err))
+        t.ok(err instanceof Error)
         server.close()
         stream.end()
         t.end()
